@@ -589,12 +589,15 @@ function Lesson() {
           </div>
         )}
 
-        <Link
+        <button
           className="primary-btn large lesson-continue"
-          to={`/app/quiz/${lesson.id}`}
+          type="button"
+          onClick={handleCompleteLesson}
+          disabled={completing}
         >
-          Continue <ChevronRight />
-        </Link>
+          {completing ? "A guardar..." : "Concluir lição"}
+          {!completing && <ChevronRight />}
+        </button>
       </div>
     </div>
   );
