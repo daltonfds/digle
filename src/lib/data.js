@@ -111,25 +111,64 @@ export async function saveProgress({
   completed = true,
   score = 0,
 }) {
-  if (!supabase || !userId) return;
+  if (!supabase || !userId || !lessonId) return null;
 
-  const { error } = await supabase
+  if (completed) {
+    const { data, error } = await supabase.rpc("complete_lesson", {
+      p_lesson_id: lessonId,
+      p_xp: Math.max(0, Number(xp) || 0),
+      p_score: Math.max(0, Number(score) || 0),
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  const { data, error } = await supabase
     .from("user_progress")
     .upsert(
       {
         user_id: userId,
         lesson_id: lessonId,
-        completed,
-        score,
-        xp_earned: xp,
-        completed_at: completed ? new Date().toISOString() : null,
+        status: "started",
+        xp_earned: 0,
+        completed_at: null,
       },
       {
         onConflict: "user_id,lesson_id",
       }
-    );
+    )
+    .select()
+    .single();
 
   if (error) throw error;
+  return data;
+}
+
+export async function getUserProgress(userId) {
+  if (!supabase || !userId) return [];
+
+  const { data, error } = await supabase
+    .from("user_progress")
+    .select("*")
+    .eq("user_id", userId)
+    .order("completed_at", { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getUserStats(userId) {
+  if (!supabase || !userId) return null;
+
+  const { data, error } = await supabase
+    .from("user_stats")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
 }
 
 export async function updateStats(userId, values) {

@@ -8,6 +8,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
+
 import {
   BookOpen,
   Check,
@@ -30,9 +31,11 @@ import {
   CreditCard,
   Settings,
 } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "./context";
 import Protected from "./components/Protected";
+
 import {
   checkAccess,
   getCourses,
@@ -41,12 +44,44 @@ import {
   getLesson,
   getQuestions,
   getStats,
-  getProgress,
   saveProgress,
   updateStats,
   getPurchases,
   getPasses,
 } from "./lib/data";
+
+import Dashboard from "./pages/Dashboard";
+import Onboarding from "./pages/Onboarding";
+import Goals from "./pages/Goals";
+import Community from "./pages/Community";
+import LeaderboardPage from "./pages/Leaderboard";
+import ProfilePage from "./pages/Profile";
+import QuizHub from "./pages/QuizHub";
+import Trails from "./pages/Trails";
+import StudyStatistics from "./pages/StudyStatistics";
+import StudyHistory from "./pages/StudyHistory";
+import Certificates from "./pages/Certificates";
+import HelpCenter from "./pages/HelpCenter";
+import ContactSupport from "./pages/ContactSupport";
+import AudioStudies from "./pages/AudioStudies";
+import ProgressPage from "./pages/Progress";
+import DailyChallenge from "./pages/DailyChallenge";
+import LessonsPage from "./pages/Lessons";
+import LessonReader from "./pages/LessonReader";
+import Bible from "./pages/Bible";
+import Notifications from "./pages/Notifications";
+import SettingsPage from "./pages/Settings";
+import SearchPage from "./pages/Search";
+import Notes from "./pages/Notes";
+import VerseOfDay from "./pages/VerseOfDay";
+import StudyPlanner from "./pages/StudyPlanner";
+import Flashcards from "./pages/Flashcards";
+import QuizPlay from "./pages/QuizPlay";
+import SavedVerses from "./pages/SavedVerses";
+import AchievementsPage from "./pages/Achievements";
+import Streak from "./pages/Streak";
+import DigleCommandCenter from "./components/DigleCommandCenter";
+
 import "./App.css";
 import "./index.css";
 
@@ -64,9 +99,14 @@ function UserLayout() {
   const [open, setOpen] = useState(false);
 
   const links = [
-    ["/app", Home, "Learn"],
+    ["/app", Home, "Dashboard"],
+    ["/app/lessons", BookOpen, "Lessons"],
+    ["/app/bible", BookMarked, "Bible"],
+    ["/app/quiz-hub", Trophy, "Quizzes"],
+    ["/app/trails", Sparkles, "Trails"],
     ["/app/ranking", Trophy, "Ranking"],
     ["/app/achievements", Sparkles, "Achievements"],
+    ["/app/community", Users, "Community"],
     ["/app/profile", User, "Profile"],
     ["/app/purchases", CreditCard, "Purchases"],
   ];
@@ -102,8 +142,11 @@ function UserLayout() {
           <div className="avatar">
             {(user?.email?.[0] || "U").toUpperCase()}
           </div>
+
           <div>
-            <strong>{user?.user_metadata?.full_name || "Learner"}</strong>
+            <strong>
+              {user?.user_metadata?.full_name || "Learner"}
+            </strong>
             <small>{user?.email}</small>
           </div>
         </div>
@@ -119,8 +162,13 @@ function UserLayout() {
           <button onClick={() => setOpen(!open)}>
             {open ? <X /> : <Menu />}
           </button>
+
           <strong>digle</strong>
         </header>
+
+        <div className="app-command-bar">
+          <DigleCommandCenter />
+        </div>
 
         <Outlet />
       </main>
@@ -140,6 +188,7 @@ function Landing() {
           <Link className="header-login" to="/login">
             Log in
           </Link>
+
           <Link className="primary-btn small" to="/register">
             Start learning
           </Link>
@@ -149,7 +198,8 @@ function Landing() {
       <section className="hero">
         <div className="hero-copy">
           <div className="eyebrow">
-            <Sparkles size={16} /> Learn the Bible. Build your faith.
+            <Sparkles size={16} />
+            Learn the Bible. Build your faith.
           </div>
 
           <h1>
@@ -166,15 +216,24 @@ function Landing() {
             <Link className="primary-btn large" to="/register">
               Start for free <ChevronRight size={20} />
             </Link>
+
             <Link className="secondary-btn large" to="/learn">
               Explore lessons
             </Link>
           </div>
 
           <div className="trust-row">
-            <span><Check size={16} /> Free lessons</span>
-            <span><Check size={16} /> Learn at your pace</span>
-            <span><Check size={16} /> No commitment</span>
+            <span>
+              <Check size={16} /> Free lessons
+            </span>
+
+            <span>
+              <Check size={16} /> Learn at your pace
+            </span>
+
+            <span>
+              <Check size={16} /> No commitment
+            </span>
           </div>
         </div>
 
@@ -182,7 +241,10 @@ function Landing() {
           <div className="game-window">
             <div className="game-top">
               <span>Today's lesson</span>
-              <span><Heart size={16} fill="currentColor" /> 5</span>
+
+              <span>
+                <Heart size={16} fill="currentColor" /> 5
+              </span>
             </div>
 
             <div className="lesson-circle">
@@ -191,7 +253,9 @@ function Landing() {
 
             <p className="game-kicker">NEW LESSON</p>
             <h3>The Good Samaritan</h3>
-            <p>Discover what Jesus taught about loving others.</p>
+            <p>
+              Discover what Jesus taught about loving others.
+            </p>
 
             <div className="game-xp">
               <Zap size={17} fill="currentColor" /> +20 XP
@@ -201,15 +265,32 @@ function Landing() {
       </section>
 
       <section className="landing-features">
-        <Feature icon={<Flame />} title="Build your streak" text="Come back every day and keep your learning streak alive." />
-        <Feature icon={<Trophy />} title="Compete & grow" text="Earn XP, climb the ranking and unlock achievements." />
-        <Feature icon={<BookOpen />} title="Learn deeply" text="Short lessons and quizzes make Scripture easier to remember." />
+        <Feature
+          icon={<Flame />}
+          title="Build your streak"
+          text="Come back every day and keep your learning streak alive."
+        />
+
+        <Feature
+          icon={<Trophy />}
+          title="Compete & grow"
+          text="Earn XP, climb the ranking and unlock achievements."
+        />
+
+        <Feature
+          icon={<BookOpen />}
+          title="Learn deeply"
+          text="Short lessons and quizzes make Scripture easier to remember."
+        />
       </section>
 
       <section className="landing-cta">
         <Sparkles size={28} />
         <h2>Your next chapter starts today.</h2>
-        <p>Start learning the Bible in a way that actually feels fun.</p>
+        <p>
+          Start learning the Bible in a way that actually feels fun.
+        </p>
+
         <Link className="primary-btn large" to="/register">
           Create my free account
         </Link>
@@ -247,10 +328,19 @@ function Learn() {
           <h1>Keep learning.</h1>
           <p>Small lessons. Big growth.</p>
         </div>
+
         <div className="top-stats">
-          <span><Flame size={17} /> 0</span>
-          <span><Zap size={17} /> 0 XP</span>
-          <span><Heart size={17} /> 5</span>
+          <span>
+            <Flame size={17} /> 0
+          </span>
+
+          <span>
+            <Zap size={17} /> 0 XP
+          </span>
+
+          <span>
+            <Heart size={17} /> 5
+          </span>
         </div>
       </div>
 
@@ -260,7 +350,9 @@ function Learn() {
         <div className="empty-state">
           <BookOpen size={42} />
           <h2>Courses are coming soon.</h2>
-          <p>The first lessons will appear here once published.</p>
+          <p>
+            The first lessons will appear here once published.
+          </p>
         </div>
       ) : (
         <div className="course-grid">
@@ -273,9 +365,13 @@ function Learn() {
               <div className="course-icon">
                 <BookOpen />
               </div>
+
               <span className="course-label">COURSE</span>
+
               <h2>{course.title}</h2>
+
               <p>{course.description}</p>
+
               <span className="course-link">
                 Start learning <ChevronRight size={17} />
               </span>
@@ -289,6 +385,7 @@ function Learn() {
 
 function Course() {
   const { courseId } = useParams();
+
   const [modules, setModules] = useState([]);
   const [lessons, setLessons] = useState({});
   const [course, setCourse] = useState(null);
@@ -300,8 +397,10 @@ function Course() {
   async function getCourseData() {
     try {
       const { getCourse } = await import("./lib/data");
+
       const c = await getCourse(courseId);
       const m = await getModules(courseId);
+
       setCourse(c);
       setModules(m);
 
@@ -322,7 +421,9 @@ function Course() {
 
   return (
     <div className="page">
-      <Link className="back-link" to="/app">← Back to learning</Link>
+      <Link className="back-link" to="/app">
+        ← Back to learning
+      </Link>
 
       <div className="course-header">
         <span className="eyebrow">COURSE</span>
@@ -335,6 +436,7 @@ function Course() {
           <section className="module" key={module.id}>
             <div className="module-heading">
               <div className="module-number">{index + 1}</div>
+
               <div>
                 <span>MODULE {index + 1}</span>
                 <h2>{module.title}</h2>
@@ -349,12 +451,22 @@ function Course() {
                   className="lesson-row"
                 >
                   <div className="lesson-row-icon">
-                    {(lesson.text_access === 'paid') ? <Lock size={18} /> : <BookOpen size={18} />}
+                    {lesson.text_access === "paid" ? (
+                      <Lock size={18} />
+                    ) : (
+                      <BookOpen size={18} />
+                    )}
                   </div>
+
                   <div>
                     <strong>{lesson.title}</strong>
-                    <small>{(lesson.text_access === 'paid') ? "Premium lesson" : "Free lesson"}</small>
+                    <small>
+                      {lesson.text_access === "paid"
+                        ? "Premium lesson"
+                        : "Free lesson"}
+                    </small>
                   </div>
+
                   <ChevronRight />
                 </Link>
               ))}
@@ -369,7 +481,6 @@ function Course() {
 function Lesson() {
   const { lessonId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [lesson, setLesson] = useState(null);
   const [access, setAccess] = useState(true);
@@ -379,11 +490,15 @@ function Lesson() {
     async function load() {
       try {
         const l = await getLesson(lessonId);
+
         setLesson(l);
 
-        if (l?.is_premium) {
+        if (l?.is_premium || l?.text_access === "paid") {
           const result = await checkAccess(lessonId);
-          setAccess(Boolean(result?.has_access || result?.access));
+
+          setAccess(
+            Boolean(result?.has_access || result?.access)
+          );
         }
       } catch (e) {
         console.error(e);
@@ -396,23 +511,39 @@ function Lesson() {
   }, [lessonId]);
 
   if (loading) return <Loading />;
-  if (!lesson) return <div className="empty-state">Lesson not found.</div>;
 
-  if ((lesson.text_access === 'paid') && !access) {
+  if (!lesson) {
+    return (
+      <div className="empty-state">
+        Lesson not found.
+      </div>
+    );
+  }
+
+  if (
+    (lesson.text_access === "paid" || lesson.is_premium) &&
+    !access
+  ) {
     return (
       <div className="locked-page">
-        <div className="locked-icon"><Lock size={34} /></div>
+        <div className="locked-icon">
+          <Lock size={34} />
+        </div>
+
         <span className="eyebrow">PREMIUM LESSON</span>
+
         <h1>{lesson.title}</h1>
+
         <p>
-          This lesson is part of Digle Premium. Unlock it to continue
-          learning and access the audio experience.
+          This lesson is part of Digle Premium. Unlock it to
+          continue learning and access the audio experience.
         </p>
 
         <div className="locked-actions">
           <Link className="primary-btn large" to="/app/purchases">
             Unlock lesson
           </Link>
+
           <Link className="secondary-btn large" to="/app">
             Back to learning
           </Link>
@@ -425,12 +556,17 @@ function Lesson() {
     <div className="lesson-page">
       <div className="lesson-progress">
         <button onClick={() => navigate(-1)}>×</button>
-        <div><span /></div>
+
+        <div>
+          <span />
+        </div>
+
         <span>1 / 1</span>
       </div>
 
       <div className="lesson-content">
         <span className="eyebrow">LESSON</span>
+
         <h1>{lesson.title}</h1>
 
         <div
@@ -448,6 +584,7 @@ function Lesson() {
               <strong>Listen to this lesson</strong>
               <small>Audio version</small>
             </div>
+
             <audio controls src={lesson.audio_url} />
           </div>
         )}
@@ -476,7 +613,9 @@ function Quiz() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    getQuestions(lessonId).then(setQuestions).catch(console.error);
+    getQuestions(lessonId)
+      .then(setQuestions)
+      .catch(console.error);
   }, [lessonId]);
 
   async function answer(option) {
@@ -484,12 +623,13 @@ function Quiz() {
 
     setSelected(option.id);
 
-    const isCorrect =
-      option.is_correct === true;
+    const isCorrect = option.is_correct === true;
 
     setCorrect(isCorrect);
 
-    if (isCorrect) setScore((s) => s + 1);
+    if (isCorrect) {
+      setScore((s) => s + 1);
+    }
 
     setTimeout(() => {
       if (index + 1 >= questions.length) {
@@ -504,6 +644,7 @@ function Quiz() {
 
   async function finish(lastCorrect) {
     const finalScore = score + (lastCorrect ? 1 : 0);
+
     setDone(true);
 
     try {
@@ -519,7 +660,8 @@ function Quiz() {
 
       await updateStats(user.id, {
         xp: Number(stats?.xp || 0) + 20,
-        lessons_completed: Number(stats?.lessons_completed || 0) + 1,
+        lessons_completed:
+          Number(stats?.lessons_completed || 0) + 1,
       });
     } catch (e) {
       console.error(e);
@@ -530,8 +672,13 @@ function Quiz() {
     return (
       <div className="empty-state">
         <BookOpen size={42} />
+
         <h2>No quiz yet.</h2>
-        <p>This lesson does not have questions configured.</p>
+
+        <p>
+          This lesson does not have questions configured.
+        </p>
+
         <button
           className="primary-btn"
           onClick={() => navigate("/app")}
@@ -545,13 +692,22 @@ function Quiz() {
   if (done) {
     return (
       <div className="result-page">
-        <div className="result-icon"><Trophy size={45} /></div>
+        <div className="result-icon">
+          <Trophy size={45} />
+        </div>
+
         <span className="eyebrow">LESSON COMPLETE</span>
+
         <h1>Great job!</h1>
-        <p>You earned <strong>+20 XP</strong>.</p>
+
+        <p>
+          You earned <strong>+20 XP</strong>.
+        </p>
+
         <div className="result-score">
           {score} / {questions.length}
         </div>
+
         <Link className="primary-btn large" to="/app">
           Continue learning
         </Link>
@@ -560,6 +716,7 @@ function Quiz() {
   }
 
   const question = questions[index];
+
   const options =
     question.question_options ||
     question.options ||
@@ -569,14 +726,27 @@ function Quiz() {
     <div className="quiz-page">
       <div className="quiz-top">
         <button onClick={() => navigate(-1)}>×</button>
+
         <div className="quiz-progress">
-          <span style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
+          <span
+            style={{
+              width: `${
+                ((index + 1) / questions.length) * 100
+              }%`,
+            }}
+          />
         </div>
-        <span>{index + 1}/{questions.length}</span>
+
+        <span>
+          {index + 1}/{questions.length}
+        </span>
       </div>
 
       <div className="quiz-card">
-        <span className="eyebrow">QUESTION {index + 1}</span>
+        <span className="eyebrow">
+          QUESTION {index + 1}
+        </span>
+
         <h1>{question.question || question.text}</h1>
 
         <div className="answers">
@@ -592,10 +762,12 @@ function Quiz() {
               }`}
               onClick={() => answer(option)}
             >
-              <span>{option.text || option.option_text}</span>
-              {selected === option.id && (
-                correct ? <Check /> : <X />
-              )}
+              <span>
+                {option.text || option.option_text}
+              </span>
+
+              {selected === option.id &&
+                (correct ? <Check /> : <X />)}
             </button>
           ))}
         </div>
@@ -613,6 +785,7 @@ function Ranking() {
           <h1>Ranking</h1>
           <p>Learn more. Climb higher.</p>
         </div>
+
         <Trophy size={38} />
       </div>
 
@@ -624,10 +797,20 @@ function Ranking() {
           ["04", "You", "1,240 XP"],
           ["05", "David", "980 XP"],
         ].map(([position, name, xp]) => (
-          <div className={`rank-row ${name === "You" ? "me" : ""}`} key={name}>
+          <div
+            className={`rank-row ${
+              name === "You" ? "me" : ""
+            }`}
+            key={name}
+          >
             <strong>{position}</strong>
-            <div className="avatar">{name[0]}</div>
+
+            <div className="avatar">
+              {name[0]}
+            </div>
+
             <span>{name}</span>
+
             <b>{xp}</b>
           </div>
         ))}
@@ -657,16 +840,30 @@ function Achievements() {
       </div>
 
       <div className="achievement-grid">
-        {achievements.map(([icon, title, text, unlocked]) => (
-          <div className={`achievement ${unlocked ? "unlocked" : ""}`} key={title}>
-            <div className="achievement-icon">
-              {unlocked ? icon : <Lock size={25} />}
+        {achievements.map(
+          ([icon, title, text, unlocked]) => (
+            <div
+              className={`achievement ${
+                unlocked ? "unlocked" : ""
+              }`}
+              key={title}
+            >
+              <div className="achievement-icon">
+                {unlocked ? (
+                  icon
+                ) : (
+                  <Lock size={25} />
+                )}
+              </div>
+
+              <h3>{title}</h3>
+
+              <p>{text}</p>
+
+              {unlocked && <span>UNLOCKED</span>}
             </div>
-            <h3>{title}</h3>
-            <p>{text}</p>
-            {unlocked && <span>UNLOCKED</span>}
-          </div>
-        ))}
+          )
+        )}
       </div>
     </div>
   );
@@ -681,30 +878,47 @@ function Profile() {
         <div className="profile-avatar">
           {(user?.email?.[0] || "U").toUpperCase()}
         </div>
+
         <span className="eyebrow">YOUR ACCOUNT</span>
-        <h1>{profile?.full_name || user?.user_metadata?.full_name || "Learner"}</h1>
+
+        <h1>
+          {profile?.full_name ||
+            user?.user_metadata?.full_name ||
+            "Learner"}
+        </h1>
+
         <p>{user?.email}</p>
       </div>
 
       <div className="settings-card">
         <div>
           <User />
+
           <div>
             <strong>Account</strong>
-            <small>Your Digle account information</small>
+            <small>
+              Your Digle account information
+            </small>
           </div>
         </div>
 
-        <div>
+        <Link to="/app/settings">
           <Settings />
+
           <div>
             <strong>Preferences</strong>
-            <small>Notifications and learning preferences</small>
+            <small>
+              Notifications and learning preferences
+            </small>
           </div>
-        </div>
+        </Link>
 
-        <button className="danger-btn" onClick={signOut}>
-          <LogOut size={18} /> Sign out
+        <button
+          className="danger-btn"
+          onClick={signOut}
+        >
+          <LogOut size={18} />
+          Sign out
         </button>
       </div>
     </div>
@@ -713,6 +927,7 @@ function Profile() {
 
 function Purchases() {
   const { user } = useAuth();
+
   const [purchases, setPurchases] = useState([]);
   const [passes, setPasses] = useState([]);
 
@@ -733,42 +948,77 @@ function Purchases() {
       <div className="page-heading">
         <div>
           <span className="eyebrow">PREMIUM</span>
+
           <h1>Unlock your journey.</h1>
-          <p>Access premium lessons and the full Digle experience.</p>
+
+          <p>
+            Access premium lessons and the full Digle
+            experience.
+          </p>
         </div>
       </div>
 
       <div className="premium-grid">
         <div className="premium-card featured">
           <Sparkles size={28} />
-          <span className="eyebrow">MOST POPULAR</span>
+
+          <span className="eyebrow">
+            MOST POPULAR
+          </span>
+
           <h2>Digle Pass</h2>
-          <p>Unlimited access to premium lessons and audio for 30 days.</p>
+
+          <p>
+            Unlimited access to premium lessons and audio
+            for 30 days.
+          </p>
+
           <div className="price">
             <strong>Admin price</strong>
             <small>30 days</small>
           </div>
-          <button className="primary-btn large" disabled>
+
+          <button
+            className="primary-btn large"
+            disabled
+          >
             Payment gateway coming soon
           </button>
         </div>
 
         <div className="premium-card">
           <Lock size={28} />
-          <span className="eyebrow">INDIVIDUAL</span>
+
+          <span className="eyebrow">
+            INDIVIDUAL
+          </span>
+
           <h2>Unlock a lesson</h2>
-          <p>Purchase individual premium content at the price defined by Digle.</p>
-          <button className="secondary-btn large" disabled>
+
+          <p>
+            Purchase individual premium content at the
+            price defined by Digle.
+          </p>
+
+          <button
+            className="secondary-btn large"
+            disabled
+          >
             Select a lesson
           </button>
         </div>
       </div>
 
-      {(purchases.length > 0 || passes.length > 0) && (
+      {(purchases.length > 0 ||
+        passes.length > 0) && (
         <div className="history-card">
           <h2>Purchase history</h2>
+
           {purchases.map((purchase) => (
-            <div className="history-row" key={purchase.id}>
+            <div
+              className="history-row"
+              key={purchase.id}
+            >
               <span>{purchase.status}</span>
               <strong>{purchase.amount}</strong>
             </div>
@@ -788,19 +1038,27 @@ function Login() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  if (user) return <Navigate to="/app" replace />;
+  if (user) {
+    return <Navigate to="/app" replace />;
+  }
 
   async function submit(e) {
     e.preventDefault();
+
     setError("");
     setBusy(true);
 
     try {
-      const { error: authError } = await signIn(email, password);
+      const { error: authError } =
+        await signIn(email, password);
+
       if (authError) throw authError;
+
       navigate("/app");
     } catch (e) {
-      setError(e.message || "Unable to sign in.");
+      setError(
+        e.message || "Unable to sign in."
+      );
     } finally {
       setBusy(false);
     }
@@ -810,25 +1068,65 @@ function Login() {
     <AuthPage
       title="Welcome back."
       subtitle="Continue your Bible journey."
-      footer={<>Don't have an account? <Link to="/register">Create one</Link></>}
+      footer={
+        <>
+          Don't have an account?{" "}
+          <Link to="/register">
+            Create one
+          </Link>
+        </>
+      }
     >
-      <form onSubmit={submit} className="auth-form">
-        {error && <div className="form-error">{error}</div>}
+      <form
+        onSubmit={submit}
+        className="auth-form"
+      >
+        {error && (
+          <div className="form-error">
+            {error}
+          </div>
+        )}
 
         <label>
           Email
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+
+          <input
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+            type="email"
+            required
+          />
         </label>
 
         <label>
           Password
-          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
+
+          <input
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            type="password"
+            required
+          />
         </label>
 
-        <Link className="forgot" to="/forgot-password">Forgot password?</Link>
+        <Link
+          className="forgot"
+          to="/forgot-password"
+        >
+          Forgot password?
+        </Link>
 
-        <button className="primary-btn large" disabled={busy}>
-          {busy ? "Signing in..." : "Log in"}
+        <button
+          className="primary-btn large"
+          disabled={busy}
+        >
+          {busy
+            ? "Signing in..."
+            : "Log in"}
         </button>
       </form>
     </AuthPage>
@@ -846,30 +1144,39 @@ function Register() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
-  if (user) return <Navigate to="/app" replace />;
+  if (user) {
+    return <Navigate to="/app" replace />;
+  }
 
   async function submit(e) {
     e.preventDefault();
+
     setError("");
     setMessage("");
     setBusy(true);
 
     try {
-      const { data, error: authError } = await signUp(
-        email,
-        password,
-        name
-      );
+      const { data, error: authError } =
+        await signUp(
+          email,
+          password,
+          name
+        );
 
       if (authError) throw authError;
 
       if (data.session) {
         navigate("/app");
       } else {
-        setMessage("Account created. Check your email to confirm your account.");
+        setMessage(
+          "Account created. Check your email to confirm your account."
+        );
       }
     } catch (e) {
-      setError(e.message || "Unable to create account.");
+      setError(
+        e.message ||
+          "Unable to create account."
+      );
     } finally {
       setBusy(false);
     }
@@ -879,46 +1186,112 @@ function Register() {
     <AuthPage
       title="Start your journey."
       subtitle="Create your free Digle account."
-      footer={<>Already have an account? <Link to="/login">Log in</Link></>}
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link to="/login">
+            Log in
+          </Link>
+        </>
+      }
     >
-      <form onSubmit={submit} className="auth-form">
-        {error && <div className="form-error">{error}</div>}
-        {message && <div className="form-success">{message}</div>}
+      <form
+        onSubmit={submit}
+        className="auth-form"
+      >
+        {error && (
+          <div className="form-error">
+            {error}
+          </div>
+        )}
+
+        {message && (
+          <div className="form-success">
+            {message}
+          </div>
+        )}
 
         <label>
           Name
-          <input value={name} onChange={(e) => setName(e.target.value)} required />
+
+          <input
+            value={name}
+            onChange={(e) =>
+              setName(e.target.value)
+            }
+            required
+          />
         </label>
 
         <label>
           Email
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+
+          <input
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+            type="email"
+            required
+          />
         </label>
 
         <label>
           Password
-          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" minLength={6} required />
+
+          <input
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            type="password"
+            minLength={6}
+            required
+          />
         </label>
 
-        <button className="primary-btn large" disabled={busy}>
-          {busy ? "Creating account..." : "Create free account"}
+        <button
+          className="primary-btn large"
+          disabled={busy}
+        >
+          {busy
+            ? "Creating account..."
+            : "Create free account"}
         </button>
       </form>
     </AuthPage>
   );
 }
 
-function AuthPage({ title, subtitle, children, footer }) {
+function AuthPage({
+  title,
+  subtitle,
+  children,
+  footer,
+}) {
   return (
     <div className="auth-page">
-      <Link className="auth-brand" to="/">digle</Link>
+      <Link
+        className="auth-brand"
+        to="/"
+      >
+        digle
+      </Link>
 
       <div className="auth-card">
-        <div className="auth-icon"><Sparkles /></div>
+        <div className="auth-icon">
+          <Sparkles />
+        </div>
+
         <h1>{title}</h1>
+
         <p>{subtitle}</p>
+
         {children}
-        <div className="auth-footer">{footer}</div>
+
+        <div className="auth-footer">
+          {footer}
+        </div>
       </div>
     </div>
   );
@@ -931,12 +1304,17 @@ function ForgotPassword() {
   async function submit(e) {
     e.preventDefault();
 
-    const { supabase } = await import("./lib/supabase");
+    const { supabase } =
+      await import("./lib/supabase");
 
     if (supabase) {
-      await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login`,
-      });
+      await supabase.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo:
+            `${window.location.origin}/login`,
+        }
+      );
     }
 
     setSent(true);
@@ -946,24 +1324,37 @@ function ForgotPassword() {
     <AuthPage
       title="Reset your password."
       subtitle="We'll send you a secure recovery link."
-      footer={<Link to="/login">Back to login</Link>}
+      footer={
+        <Link to="/login">
+          Back to login
+        </Link>
+      }
     >
       {sent ? (
         <div className="form-success">
           Check your email for the password reset link.
         </div>
       ) : (
-        <form onSubmit={submit} className="auth-form">
+        <form
+          onSubmit={submit}
+          className="auth-form"
+        >
           <label>
             Email
+
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               required
             />
           </label>
-          <button className="primary-btn large">Send reset link</button>
+
+          <button className="primary-btn large">
+            Send reset link
+          </button>
         </form>
       )}
     </AuthPage>
@@ -984,27 +1375,42 @@ function AdminLayout() {
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <Link to="/admin" className="admin-brand">
+        <Link
+          to="/admin"
+          className="admin-brand"
+        >
           digle <span>ADMIN</span>
         </Link>
 
         <nav>
-          {links.map(([to, Icon, label]) => (
-            <Link key={to} to={to} className="admin-nav-item">
-              <Icon size={19} />
-              {label}
-            </Link>
-          ))}
+          {links.map(
+            ([to, Icon, label]) => (
+              <Link
+                key={to}
+                to={to}
+                className="admin-nav-item"
+              >
+                <Icon size={19} />
+                {label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="admin-security">
           <ShieldCheck size={20} />
           <strong>Admin mode</strong>
-          <small>Protected workspace</small>
+          <small>
+            Protected workspace
+          </small>
         </div>
 
-        <button onClick={signOut} className="logout-btn">
-          <LogOut size={18} /> Sign out
+        <button
+          onClick={signOut}
+          className="logout-btn"
+        >
+          <LogOut size={18} />
+          Sign out
         </button>
       </aside>
 
@@ -1014,8 +1420,12 @@ function AdminLayout() {
             <span>DIGLE ADMIN</span>
             <h2>Control center</h2>
           </div>
-          <Link to="/app">Open user app →</Link>
+
+          <Link to="/app">
+            Open user app →
+          </Link>
         </header>
+
         <Outlet />
       </main>
     </div>
@@ -1031,31 +1441,60 @@ function AdminDashboard() {
       </div>
 
       <div className="admin-stats">
-        <AdminStat icon={<Users />} title="Users" value="—" />
-        <AdminStat icon={<BookOpen />} title="Courses" value="—" />
-        <AdminStat icon={<CreditCard />} title="Purchases" value="—" />
-        <AdminStat icon={<BarChart3 />} title="Revenue" value="—" />
+        <AdminStat
+          icon={<Users />}
+          title="Users"
+          value="—"
+        />
+
+        <AdminStat
+          icon={<BookOpen />}
+          title="Courses"
+          value="—"
+        />
+
+        <AdminStat
+          icon={<CreditCard />}
+          title="Purchases"
+          value="—"
+        />
+
+        <AdminStat
+          icon={<BarChart3 />}
+          title="Revenue"
+          value="—"
+        />
       </div>
 
       <div className="admin-panels">
         <div className="admin-panel">
           <h2>Content management</h2>
+
           <p>
-            Publish courses, modules, lessons and quizzes from the admin
-            workspace.
+            Publish courses, modules, lessons and quizzes
+            from the admin workspace.
           </p>
-          <Link className="primary-btn" to="/admin/content">
+
+          <Link
+            className="primary-btn"
+            to="/admin/content"
+          >
             Manage content
           </Link>
         </div>
 
         <div className="admin-panel">
           <h2>Monetization</h2>
+
           <p>
-            Configure premium lessons, individual prices and the 30-day
-            Digle Pass.
+            Configure premium lessons, individual prices
+            and the 30-day Digle Pass.
           </p>
-          <Link className="secondary-btn" to="/admin/purchases">
+
+          <Link
+            className="secondary-btn"
+            to="/admin/purchases"
+          >
             View purchases
           </Link>
         </div>
@@ -1064,7 +1503,11 @@ function AdminDashboard() {
   );
 }
 
-function AdminStat({ icon, title, value }) {
+function AdminStat({
+  icon,
+  title,
+  value,
+}) {
   return (
     <div className="admin-stat">
       {icon}
@@ -1075,10 +1518,13 @@ function AdminStat({ icon, title, value }) {
 }
 
 function AdminCourses() {
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] =
+    useState([]);
 
   useEffect(() => {
-    getCourses().then(setCourses).catch(console.error);
+    getCourses()
+      .then(setCourses)
+      .catch(console.error);
   }, []);
 
   return (
@@ -1086,7 +1532,9 @@ function AdminCourses() {
       <div className="admin-title">
         <span>CATALOG</span>
         <h1>Courses</h1>
-        <p>Published courses visible in the learning app.</p>
+        <p>
+          Published courses visible in the learning app.
+        </p>
       </div>
 
       <div className="admin-table">
@@ -1097,10 +1545,21 @@ function AdminCourses() {
         </div>
 
         {courses.map((course) => (
-          <div className="table-row" key={course.id}>
+          <div
+            className="table-row"
+            key={course.id}
+          >
             <strong>{course.title}</strong>
-            <span className="status active">Published</span>
-            <Link to={`/app/course/${course.id}`}>View →</Link>
+
+            <span className="status active">
+              Published
+            </span>
+
+            <Link
+              to={`/app/course/${course.id}`}
+            >
+              View →
+            </Link>
           </div>
         ))}
 
@@ -1120,22 +1579,57 @@ function AdminContent() {
       <div className="admin-title">
         <span>CMS</span>
         <h1>Content</h1>
-        <p>Manage the learning structure and premium content.</p>
+        <p>
+          Manage the learning structure and premium content.
+        </p>
       </div>
 
       <div className="content-manager-grid">
-        <ManagerCard icon={<BookOpen />} title="Courses" text="Create and organize Bible courses." />
-        <ManagerCard icon={<BookMarked />} title="Modules" text="Organize lessons into learning paths." />
-        <ManagerCard icon={<Sparkles />} title="Lessons" text="Create free and premium lessons." />
-        <ManagerCard icon={<Zap />} title="Questions" text="Build quizzes and answer options." />
-        <ManagerCard icon={<CreditCard />} title="Pricing" text="Set individual and Pass prices." />
-        <ManagerCard icon={<BarChart3 />} title="Analytics" text="Monitor learning and revenue." />
+        <ManagerCard
+          icon={<BookOpen />}
+          title="Courses"
+          text="Create and organize Bible courses."
+        />
+
+        <ManagerCard
+          icon={<BookMarked />}
+          title="Modules"
+          text="Organize lessons into learning paths."
+        />
+
+        <ManagerCard
+          icon={<Sparkles />}
+          title="Lessons"
+          text="Create free and premium lessons."
+        />
+
+        <ManagerCard
+          icon={<Zap />}
+          title="Questions"
+          text="Build quizzes and answer options."
+        />
+
+        <ManagerCard
+          icon={<CreditCard />}
+          title="Pricing"
+          text="Set individual and Pass prices."
+        />
+
+        <ManagerCard
+          icon={<BarChart3 />}
+          title="Analytics"
+          text="Monitor learning and revenue."
+        />
       </div>
     </div>
   );
 }
 
-function ManagerCard({ icon, title, text }) {
+function ManagerCard({
+  icon,
+  title,
+  text,
+}) {
   return (
     <div className="manager-card">
       <div>{icon}</div>
@@ -1152,14 +1646,19 @@ function AdminUsers() {
       <div className="admin-title">
         <span>PEOPLE</span>
         <h1>Users</h1>
-        <p>User management and account activity.</p>
+        <p>
+          User management and account activity.
+        </p>
       </div>
+
       <div className="admin-panel">
         <Users size={35} />
+
         <h2>User management</h2>
+
         <p>
-          Connect this area to your profiles table for account management,
-          activity and admin actions.
+          Connect this area to your profiles table for
+          account management, activity and admin actions.
         </p>
       </div>
     </div>
@@ -1172,15 +1671,20 @@ function AdminPurchases() {
       <div className="admin-title">
         <span>MONETIZATION</span>
         <h1>Purchases</h1>
-        <p>Payments, unlocks and premium passes.</p>
+        <p>
+          Payments, unlocks and premium passes.
+        </p>
       </div>
 
       <div className="admin-panel">
         <CreditCard size={35} />
+
         <h2>Payment operations</h2>
+
         <p>
-          The payment webhook already provides the secure backend flow.
-          Connect the payment provider before enabling checkout.
+          The payment webhook already provides the secure
+          backend flow. Connect the payment provider before
+          enabling checkout.
         </p>
       </div>
     </div>
@@ -1194,37 +1698,287 @@ function AdminAnalytics() {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/learn" element={<Learn />} />
+      <Route
+        path="/"
+        element={<Landing />}
+      />
 
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route
+        path="/learn"
+        element={<LessonsPage />}
+      />
+
+      <Route
+        path="/login"
+        element={<Login />}
+      />
+
+      <Route
+        path="/register"
+        element={<Register />}
+      />
+
+      <Route
+        path="/forgot-password"
+        element={<ForgotPassword />}
+      />
 
       <Route element={<Protected />}>
-        <Route path="/app" element={<UserLayout />}>
-          <Route index element={<Learn />} />
-          <Route path="course/:courseId" element={<Course />} />
-          <Route path="lesson/:lessonId" element={<Lesson />} />
-          <Route path="quiz/:lessonId" element={<Quiz />} />
-          <Route path="ranking" element={<Ranking />} />
-          <Route path="achievements" element={<Achievements />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="purchases" element={<Purchases />} />
+        <Route
+          path="/app"
+          element={<UserLayout />}
+        >
+          <Route
+            index
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="dashboard"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="onboarding"
+            element={<Onboarding />}
+          />
+
+          <Route
+            path="lessons"
+            element={<LessonsPage />}
+          />
+
+          <Route
+            path="lesson-reader"
+            element={<LessonReader />}
+          />
+
+          <Route
+            path="lesson/:lessonId"
+            element={<Lesson />}
+          />
+
+          <Route
+            path="course/:courseId"
+            element={<Course />}
+          />
+
+          <Route
+            path="quiz/:lessonId"
+            element={<Quiz />}
+          />
+
+          <Route
+            path="quiz-hub"
+            element={<QuizHub />}
+          />
+
+          <Route
+            path="quiz-play"
+            element={<QuizPlay />}
+          />
+
+          <Route
+            path="daily-challenge"
+            element={<DailyChallenge />}
+          />
+
+          <Route
+            path="flashcards"
+            element={<Flashcards />}
+          />
+
+          <Route
+            path="trails"
+            element={<Trails />}
+          />
+
+          <Route
+            path="bible"
+            element={<Bible />}
+          />
+
+          <Route
+            path="audio"
+            element={<AudioStudies />}
+          />
+
+          <Route
+            path="audio-studies"
+            element={<AudioStudies />}
+          />
+
+          <Route
+            path="verse-of-day"
+            element={<VerseOfDay />}
+          />
+
+          <Route
+            path="saved-verses"
+            element={<SavedVerses />}
+          />
+
+          <Route
+            path="notes"
+            element={<Notes />}
+          />
+
+          <Route
+            path="planner"
+            element={<StudyPlanner />}
+          />
+
+          <Route
+            path="study-planner"
+       element={<StudyPlanner />}
+          />
+
+          <Route
+            path="study-planner"
+            element={<StudyPlanner />}
+          />
+
+          <Route
+            path="progress"
+            element={<ProgressPage />}
+          />
+
+          <Route
+            path="statistics"
+            element={<StudyStatistics />}
+          />
+
+          <Route
+            path="study-statistics"
+            element={<StudyStatistics />}
+          />
+
+          <Route
+            path="history"
+            element={<StudyHistory />}
+          />
+
+          <Route
+            path="study-history"
+            element={<StudyHistory />}
+          />
+
+          <Route
+            path="streak"
+            element={<Streak />}
+          />
+
+          <Route
+            path="goals"
+            element={<Goals />}
+          />
+
+          <Route
+            path="achievements"
+            element={<AchievementsPage />}
+          />
+
+          <Route
+            path="ranking"
+            element={<LeaderboardPage />}
+          />
+
+          <Route
+            path="leaderboard"
+            element={<LeaderboardPage />}
+          />
+
+          <Route
+            path="community"
+            element={<Community />}
+          />
+
+          <Route
+            path="certificates"
+            element={<Certificates />}
+          />
+
+          <Route
+            path="notifications"
+            element={<Notifications />}
+          />
+
+          <Route
+            path="search"
+            element={<SearchPage />}
+          />
+
+          <Route
+            path="profile"
+            element={<ProfilePage />}
+          />
+
+          <Route
+            path="settings"
+            element={<SettingsPage />}
+          />
+
+          <Route
+            path="help"
+            element={<HelpCenter />}
+          />
+
+          <Route
+            path="contact"
+            element={<ContactSupport />}
+          />
+
+          <Route
+            path="purchases"
+            element={<Purchases />}
+          />
         </Route>
 
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="courses" element={<AdminCourses />} />
-          <Route path="content" element={<AdminContent />} />
-          <Route path="lessons" element={<AdminContent />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="purchases" element={<AdminPurchases />} />
-          <Route path="analytics" element={<AdminAnalytics />} />
+        <Route
+          path="/admin"
+          element={<AdminLayout />}
+        >
+          <Route
+            index
+            element={<AdminDashboard />}
+          />
+
+          <Route
+            path="courses"
+            element={<AdminCourses />}
+          />
+
+          <Route
+            path="content"
+            element={<AdminContent />}
+          />
+
+          <Route
+            path="lessons"
+            element={<AdminContent />}
+          />
+
+          <Route
+            path="users"
+            element={<AdminUsers />}
+          />
+
+          <Route
+            path="purchases"
+            element={<AdminPurchases />}
+          />
+
+          <Route
+            path="analytics"
+            element={<AdminAnalytics />}
+          />
         </Route>
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
     </Routes>
   );
 }
