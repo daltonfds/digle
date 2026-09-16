@@ -1214,7 +1214,7 @@ function AppRoutes() {
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element{<AdminDashboard />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="courses" element={<AdminCourses />} />
           <Route path="content" element={<AdminContent />} />
           <Route path="lessons" element={<AdminContent />} />
