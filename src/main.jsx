@@ -7,6 +7,7 @@ import {
   BarChart3, Plus, Settings, LogOut, ArrowLeft, Zap, CircleHelp
 } from 'lucide-react'
 import './style.css'
+import { AuthProvider } from './context'
 
 const lessons = [
   { id: 1, title: 'Quem é Jesus?', subtitle: 'Conheça a mensagem central', xp: 20, free: true, icon: '✝️', color: 'green' },
@@ -300,4 +301,8 @@ function App() {
   )
 }
 
-createRoot(document.getElementById('root')).render(<App />)
+createRoot(document.getElementById('root')).render(
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+)
