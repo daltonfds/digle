@@ -1,71 +1,57 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Flame,
   Trophy,
   BookOpen,
   ArrowRight,
   Play,
-  CheckCircle2,
   Clock3,
   Target,
   Sparkles,
 } from "lucide-react";
-import { getStored } from "../lib/digleStorage";
-
-const weekly = [
-  { day: "Seg", value: 18, active: true },
-  { day: "Ter", value: 26, active: true },
-  { day: "Qua", value: 12, active: true },
-  { day: "Qui", value: 31, active: true },
-  { day: "Sex", value: 22, active: true },
-  { day: "Sáb", value: 38, active: true },
-  { day: "Dom", value: 0, active: false },
-];
-
-const continueLessons = [
-  {
-    id: 1,
-    title: "Vivendo pela fé",
-    category: "Fé",
-    progress: 66,
-    duration: "12 min",
-    xp: 80,
-  },
-  {
-    id: 2,
-    title: "O poder da oração",
-    category: "Oração",
-    progress: 40,
-    duration: "15 min",
-    xp: 70,
-  },
-  {
-    id: 3,
-    title: "O amor de Cristo",
-    category: "Evangelho",
-    progress: 18,
-    duration: "18 min",
-    xp: 90,
-  },
-];
-
-const dailyTasks = [
-  { id: 1, title: "Completar uma lição", xp: 50, done: true },
-  { id: 2, title: "Responder ao desafio diário", xp: 30, done: false },
-  { id: 3, title: "Ler um capítulo da Bíblia", xp: 25, done: false },
-];
+import { getDashboardData, recordActivity } from "../lib/digleApi";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const navigate = useNavigate();
-  const xp = Number(getStored("xp", 420));
-  const streak = Number(getStored("streak", 7));
-  const level = Math.floor(xp / 100) + 1;
-  const nextLevel = level * 100;
-  const levelProgress = Math.min(100, (xp / nextLevel) * 100);
 
-  const completedTasks = dailyTasks.filter((task) => task.done).length;
-  const maxWeek = Math.max(...weekly.map((item) => item.value));
+  const [data, setData] = useState({
+    user: null,
+    stats: null,
+    progress: [],
+    achievements: [],
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    try {
+      setLoading(true);
+      setData(await getDashboardData());
+    } catch (error) {
+      console.error("Dashboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const xp = Number(data.stats?.xp_total || 0);
+  const streak = Number(data.stats?.streak_current || 0);
+  const level = Math.floor(xp / 100) + 1;
+  const currentLevelXP = (level - 1) * 100;
+  const nextLevelXP = level * 100;
+  const levelProgress = Math.min(
+    100,
+    ((xp - currentLevelXP) / 100) * 100
+  );
+
+  const completedLessons = data.progress.filter(
+    (item) => item.status === "completed"
+  ).length;
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -74,6 +60,52 @@ export default function Dashboard() {
     if (hour < 18) return "Boa tarde";
     return "Boa noite";
   }, []);
+
+  const name =
+    data.user?.user_metadata?.display_name ||
+    data.user?.email?.split("@")[0] ||
+    "Peregrino";
+
+  const continueLessons = [
+    {
+      id: "vivendo-pela-fe",
+      title: "Vivendo pela fé",
+      category: "Fé",
+      progress: 66,
+      duration: "12 min",
+    },
+    {
+      id: "poder-da-oracao",
+      title: "O poder da oração",
+      category: "Oração",
+      progress: 40,
+      duration: "15 min",
+    },
+    {
+      id: "amor-de-cristo",
+      title: "O amor de Cristo",
+      category: "Evangelho",
+      progress: 18,
+      duration: "18 min",
+    },
+  ];
+
+  const todayTasks = [
+    {
+      title: "Completar uma lição",
+      done: completedLessons > 0,
+    },
+    {
+      title: "Responder ao desafio diário",
+      done: false,
+    },
+    {
+      title: "Ler a Bíblia",
+      done: false,
+    },
+  ];
+
+  const completedTasks = todayTasks.filter((task) => task.done).length;
 
   return (
     <main className="digle-dashboard">
@@ -84,7 +116,9 @@ export default function Dashboard() {
             SUA JORNADA BÍBLICA
           </span>
 
-          <h1>{greeting}! 👋</h1>
+          <h1>
+            {greeting}! {name} 👋
+          </h1>
 
           <p>
             Continue sua jornada e descubra algo novo hoje.
@@ -93,7 +127,7 @@ export default function Dashboard() {
 
         <button
           className="dashboard-primary-action"
-          onClick={() => (navigate("/app/lessons"))}
+          onClick={() => navigate("/app/lessons")}
         >
           <Play size={16} />
           Continuar estudando
@@ -109,7 +143,7 @@ export default function Dashboard() {
             <span>SEQUÊNCIA</span>
           </div>
 
-          <strong>{streak} dias</strong>
+          <strong>{loading ? "—" : `${streak} dias`}</strong>
           <small>Continue hoje para manter sua sequência.</small>
         </article>
 
@@ -121,8 +155,10 @@ export default function Dashboard() {
             <span>XP TOTAL</span>
           </div>
 
-          <strong>{xp.toLocaleString("pt-BR")}</strong>
-          <small>{nextLevel - xp} XP para o nível {level + 1}</small>
+          <strong>{loading ? "—" : xp.toLocaleString("pt-BR")}</strong>
+          <small>
+            {Math.max(0, nextLevelXP - xp)} XP para o nível {level + 1}
+          </small>
         </article>
 
         <article className="dashboard-stat-card">
@@ -133,8 +169,8 @@ export default function Dashboard() {
             <span>LIÇÕES</span>
           </div>
 
-          <strong>12</strong>
-          <small>Continue aprendendo todos os dias.</small>
+          <strong>{loading ? "—" : completedLessons}</strong>
+          <small>lições concluídas na sua jornada.</small>
         </article>
 
         <article className="dashboard-stat-card">
@@ -158,17 +194,17 @@ export default function Dashboard() {
               <h2>Suas lições</h2>
             </div>
 
-            <button onClick={() => (navigate("/app/lessons"))}>
+            <button onClick={() => navigate("/app/lessons")}>
               Ver todas
               <ArrowRight size={15} />
             </button>
           </div>
 
           <div className="dashboard-lessons">
-            {continueLessons.map((lesson) => (
+            {continueLessons.map((lesson, index) => (
               <article className="dashboard-lesson" key={lesson.id}>
                 <div className="dashboard-lesson-number">
-                  0{lesson.id}
+                  0{index + 1}
                 </div>
 
                 <div className="dashboard-lesson-content">
@@ -176,13 +212,12 @@ export default function Dashboard() {
                   <h3>{lesson.title}</h3>
 
                   <div className="dashboard-progress-track">
-                    <div
-                      style={{ width: `${lesson.progress}%` }}
-                    />
+                    <div style={{ width: `${lesson.progress}%` }} />
                   </div>
 
                   <div className="dashboard-lesson-meta">
                     <small>{lesson.progress}% concluído</small>
+
                     <small>
                       <Clock3 size={13} />
                       {lesson.duration}
@@ -192,9 +227,7 @@ export default function Dashboard() {
 
                 <button
                   className="dashboard-lesson-action"
-                  onClick={() =>
-                    (navigate("/app/lesson-reader"))
-                  }
+                  onClick={() => navigate("/app/lessons")}
                 >
                   <Play size={15} />
                 </button>
@@ -204,121 +237,94 @@ export default function Dashboard() {
 
           <div className="dashboard-section-heading weekly-heading">
             <div>
-              <span>ATIVIDADE</span>
-              <h2>Seu ritmo esta semana</h2>
+              <span>SEU NÍVEL</span>
+              <h2>Nível {level}</h2>
             </div>
 
-            <strong>147 XP</strong>
+            <strong>{xp} XP</strong>
           </div>
 
           <article className="dashboard-chart-card">
-            <div className="dashboard-chart">
-              {weekly.map((item) => {
-                const height =
-                  item.value === 0
-                    ? 5
-                    : Math.max(18, (item.value / maxWeek) * 100);
+            <div className="dashboard-level-progress">
+              <div
+                className="dashboard-level-progress-fill"
+                style={{ width: `${levelProgress}%` }}
+              />
+            </div>
 
-                return (
-                  <div className="dashboard-chart-column" key={item.day}>
-                    <div className="dashboard-chart-value">
-                      {item.value > 0 ? item.value : ""}
-                    </div>
-
-                    <div className="dashboard-chart-bar">
-                      <div
-                        className={item.active ? "active" : ""}
-                        style={{ height: `${height}%` }}
-                      />
-                    </div>
-
-                    <span>{item.day}</span>
-                  </div>
-                );
-              })}
+            <div className="dashboard-level-meta">
+              <span>{currentLevelXP} XP</span>
+              <span>{nextLevelXP} XP</span>
             </div>
           </article>
         </div>
 
         <aside className="dashboard-right-column">
-          <article className="dashboard-level-card">
-            <div className="dashboard-level-header">
-              <div>
-                <span>SEU NÍVEL</span>
-                <strong>{level}</strong>
-              </div>
-
-              <div className="dashboard-level-badge">
-                <Trophy size={19} />
-              </div>
+          <div className="dashboard-section-heading">
+            <div>
+              <span>HOJE</span>
+              <h2>Seu objetivo</h2>
             </div>
-
-            <div className="dashboard-level-progress">
-              <div style={{ width: `${levelProgress}%` }} />
-            </div>
-
-            <div className="dashboard-level-footer">
-              <span>{xp} XP</span>
-              <span>{nextLevel} XP</span>
-            </div>
-          </article>
+          </div>
 
           <article className="dashboard-daily-card">
-            <div className="dashboard-section-heading compact">
+            <div className="dashboard-daily-top">
               <div>
-                <span>DESAFIO DE HOJE</span>
-                <h2>Meta diária</h2>
+                <span>PROGRESSO DIÁRIO</span>
+                <strong>{completedTasks}/3</strong>
               </div>
 
-              <Target size={19} />
+              <Target size={22} />
             </div>
 
-            <p>
-              Complete suas atividades para ganhar XP e manter
-              sua sequência.
-            </p>
+            <div className="dashboard-daily-progress">
+              <div
+                style={{
+                  width: `${(completedTasks / 3) * 100}%`,
+                }}
+              />
+            </div>
 
-            <div className="dashboard-task-list">
-              {dailyTasks.map((task) => (
-                <div className="dashboard-task" key={task.id}>
-                  <div className={task.done ? "done" : ""}>
-                    {task.done && <CheckCircle2 size={17} />}
-                  </div>
-
-                  <span>{task.title}</span>
-
-                  <strong>+{task.xp}</strong>
+            <div className="dashboard-daily-tasks">
+              {todayTasks.map((task) => (
+                <div key={task.title}>
+                  <span className={task.done ? "done" : ""}>
+                    {task.done ? "✓" : "○"}
+                  </span>
+                  <p>{task.title}</p>
                 </div>
               ))}
             </div>
 
             <button
-              className="dashboard-challenge-button"
-              onClick={() =>
-                (navigate("/app/daily-challenge"))
-              }
+              className="primary-btn"
+              onClick={async () => {
+                try {
+                  await recordActivity({
+                    type: "dashboard",
+                    minutes: 1,
+                    xp: 0,
+                  });
+                  await load();
+                } catch (error) {
+                  console.error(error);
+                }
+              }}
             >
-              Fazer desafio
-              <ArrowRight size={15} />
+              Atualizar progresso
             </button>
           </article>
 
-          <article className="dashboard-bible-card">
-            <BookOpen size={22} />
+          <article className="dashboard-next-level">
+            <Trophy size={22} />
 
             <div>
-              <span>VERSÍCULO DO DIA</span>
-              <strong>
-                “O Senhor é o meu pastor; nada me faltará.”
-              </strong>
-              <small>Salmos 23:1</small>
+              <span>PRÓXIMO NÍVEL</span>
+              <strong>Nível {level + 1}</strong>
+              <small>
+                Faltam {Math.max(0, nextLevelXP - xp)} XP
+              </small>
             </div>
-
-            <button
-              onClick={() => (navigate("/app/verse-of-day"))}
-            >
-              Ler
-            </button>
           </article>
         </aside>
       </section>
