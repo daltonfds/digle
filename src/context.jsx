@@ -60,14 +60,14 @@ export function AuthProvider({ children }) {
       email,
       password,
       options: {
-        data: { full_name: name },
+        data: { display_name: name },
       },
     });
 
     if (!result.error && result.data.user) {
       await supabase.from("profiles").upsert({
         id: result.data.user.id,
-        full_name: name,
+        display_name: name,
       });
     }
 
