@@ -7,7 +7,7 @@ import {
   BarChart3, Plus, Settings, LogOut, ArrowLeft, Zap, CircleHelp
 } from 'lucide-react'
 import './style.css'
-import { AuthProvider } from './context'
+import { AuthProvider, useAuth } from './context'
 
 const lessons = [
   { id: 1, title: 'Quem é Jesus?', subtitle: 'Conheça a mensagem central', xp: 20, free: true, icon: '✝️', color: 'green' },
@@ -37,6 +37,7 @@ const quiz = [
 ]
 
 function App() {
+  const { user, signIn, signUp, loading } = useAuth()
   const [screen, setScreen] = useState('home')
   const [selectedLesson, setSelectedLesson] = useState(null)
   const [showLogin, setShowLogin] = useState(false)
@@ -51,8 +52,18 @@ function App() {
   const [answered, setAnswered] = useState(null)
   const [audioPlaying, setAudioPlaying] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
+  const [authMode, setAuthMode] = useState('signup')
+  const [authName, setAuthName] = useState('')
+  const [authEmail, setAuthEmail] = useState('')
+  const [authPassword, setAuthPassword] = useState('')
+  const [authError, setAuthError] = useState('')
+  const [authLoading, setAuthLoading] = useState(false)
 
   const openLesson = lesson => {
+    if (!user && lesson.id === 1) {
+      setShowLogin(true)
+      return
+    }
     if (!lesson.free && !unlocked.includes(lesson.id)) {
       setSelectedLesson(lesson)
       setShowPay(true)
@@ -127,7 +138,7 @@ function App() {
               <span className="eyebrow"><Sparkles size={15}/> APRENDA. VIVA. CRESÇA.</span>
               <h1>Conheça a Bíblia.<br/><span>Transforme sua vida.</span></h1>
               <p>Aprenda ensinamentos bíblicos de forma simples, divertida e envolvente — um passo de cada vez.</p>
-              <button className="primary" onClick={() => openLesson(lessons[0])}>
+              <button className="primary" onClick={() => setShowLogin(true)}>
                 Continuar aprendendo <ChevronRight size={19}/>
               </button>
             </div>
@@ -289,10 +300,64 @@ function App() {
             <motion.div className="loginModal" initial={{scale:.94,opacity:0}} animate={{scale:1,opacity:1}} onClick={e=>e.stopPropagation()}>
               <button className="close" onClick={()=>setShowLogin(false)}><X/></button>
               <div className="loginLogo">D</div><h2>Continue no Digle</h2><p>Crie sua conta para guardar seu progresso e acessar conteúdos premium.</p>
-              <input placeholder="Seu nome ou email"/>
-              <input type="password" placeholder="Senha"/>
-              <button className="primary full" onClick={()=>{setLoggedIn(true);setShowLogin(false)}}>Criar conta / Entrar <ChevronRight/></button>
-              <small>Ao continuar, seu progresso fica associado à sua conta.</small>
+              {authMode === 'signup' && (
+                <input
+                  placeholder="Seu nome"
+                  value={authName}
+                  onChange={e => setAuthName(e.target.value)}
+                />
+              )}
+              <input
+                type="email"
+                placeholder="Seu email"
+                value={authEmail}
+                onChange={e => setAuthEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Senha"
+                value={authPassword}
+                onChange={e => setAuthPassword(e.target.value)}
+              />
+              {authError && <p className="authError">{authError}</p>}
+              <button
+                className="primary full"
+                disabled={authLoading}
+                onClick={async () => {
+                  setAuthError('')
+                  setAuthLoading(true)
+                  try {
+                    const result = authMode === 'signup'
+                      ? await signUp(authEmail, authPassword, authName)
+                      : await signIn(authEmail, authPassword)
+
+                    if (result.error) throw result.error
+
+                    setLoggedIn(true)
+                    setShowLogin(false)
+                    window.location.href = '/dashboard'
+                  } catch (error) {
+                    setAuthError(error.message || 'Não foi possível entrar.')
+                  } finally {
+                    setAuthLoading(false)
+                  }
+                }}
+              >
+                {authLoading ? 'Aguarde...' : authMode === 'signup' ? 'Criar conta' : 'Entrar'}
+                <ChevronRight/>
+              </button>
+              <button
+                className="authSwitch"
+                onClick={() => {
+                  setAuthMode(authMode === 'signup' ? 'login' : 'signup')
+                  setAuthError('')
+                }}
+              >
+                {authMode === 'signup'
+                  ? 'Já tenho uma conta — Entrar'
+                  : 'Ainda não tenho conta — Criar cadastro'}
+              </button>
+              <small>Seu progresso ficará associado à sua conta.</small>
             </motion.div>
           </motion.div>
         )}
