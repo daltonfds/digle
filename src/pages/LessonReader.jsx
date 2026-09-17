@@ -1,264 +1,159 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  ArrowRight,
   BookOpen,
-  CheckCircle,
-  Lightbulb,
-  MessageCircle,
+  CheckCircle2,
+  ChevronRight,
+  Flame,
+  Heart,
+  Lock,
   Star,
   Trophy,
-  Play,
 } from "lucide-react";
+import { useGamification } from "../hooks/useGamification";
 
-const sections = [
-  {
-    title: "O que é fé?",
-    text: "A fé é confiar em Deus e acreditar naquilo que Ele promete, mesmo quando ainda não conseguimos ver o resultado.",
-    verse: "Ora, a fé é a certeza daquilo que esperamos e a prova das coisas que não vemos.",
-    reference: "Hebreus 11:1",
+const content = {
+  en: {
+    back: "Back to lessons",
+    lesson: "Lesson 01",
+    title: "God's Love",
+    subtitle: "Discover the depth of God's unconditional love.",
+    reading: "Today's teaching",
+    paragraph1:
+      "God's love is constant, unconditional, and available to everyone. It is not based on our achievements or failures.",
+    paragraph2:
+      "When we understand God's love, we can live with confidence, hope, and purpose. His love invites us to grow every day.",
+    reflection: "Reflection",
+    question: "What does God's love mean to you?",
+    answer: "God's love reminds me that I am never alone.",
+    complete: "Complete lesson",
+    completed: "Lesson completed!",
+    earned: "You earned +25 XP",
+    continue: "Continue learning",
+    xp: "XP",
+    streak: "Day streak",
+    hearts: "Hearts",
+    locked: "Premium content",
   },
-  {
-    title: "Fé não é apenas conhecimento",
-    text: "Conhecer aquilo que a Bíblia ensina é importante, mas a fé também envolve colocar esse conhecimento em prática. É confiar em Deus nas decisões, dificuldades e momentos de incerteza.",
-    verse: "Confia no Senhor de todo o teu coração e não te apoies no teu próprio entendimento.",
-    reference: "Provérbios 3:5",
+  pt: {
+    back: "Voltar às lições",
+    lesson: "Lição 01",
+    title: "O Amor de Deus",
+    subtitle: "Descobre a profundidade do amor incondicional de Deus.",
+    reading: "Ensinamento de hoje",
+    paragraph1:
+      "O amor de Deus é constante, incondicional e está disponível para todos. Não depende das nossas conquistas ou falhas.",
+    paragraph2:
+      "Quando compreendemos o amor de Deus, podemos viver com confiança, esperança e propósito. O Seu amor convida-nos a crescer todos os dias.",
+    reflection: "Reflexão",
+    question: "O que o amor de Deus significa para ti?",
+    answer: "O amor de Deus lembra-me que nunca estou sozinho.",
+    complete: "Concluir lição",
+    completed: "Lição concluída!",
+    earned: "Ganhaste +25 XP",
+    continue: "Continuar a aprender",
+    xp: "XP",
+    streak: "Dias seguidos",
+    hearts: "Corações",
+    locked: "Conteúdo premium",
   },
-  {
-    title: "Como desenvolver a fé?",
-    text: "A fé cresce quando ouvimos a Palavra, oramos, aprendemos com aquilo que Deus já fez e escolhemos confiar nEle diariamente.",
-    verse: "De sorte que a fé é pelo ouvir, e o ouvir pela palavra de Deus.",
-    reference: "Romanos 10:17",
-  },
-];
+};
 
 export default function LessonReader() {
-  const [section, setSection] = useState(0);
-  const [saved, setSaved] = useState(false);
+  const navigate = useNavigate();
+  const [language, setLanguage] = useState("en");
   const [completed, setCompleted] = useState(false);
+  const { state, finishLesson } = useGamification();
 
-  const current = sections[section];
-  const last = section === sections.length - 1;
-  const progress = ((section + 1) / sections.length) * 100;
+  const t = content[language];
 
-  const next = () => {
-    if (last) {
+  const handleComplete = () => {
+    if (!completed) {
+      finishLesson("gods-love");
       setCompleted(true);
-      return;
     }
-
-    setSection((value) => value + 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  const previous = () => {
-    if (section === 0) return;
-
-    setSection((value) => value - 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  if (completed) {
-    return (
-      <div className="lesson-reader-page">
-        <div className="lesson-completion">
-          <div className="lesson-completion-icon">
-            <Trophy size={34} />
-          </div>
-
-          <span className="eyebrow">LIÇÃO CONCLUÍDA</span>
-
-          <h1>Você avançou mais um passo!</h1>
-
-          <p>
-            Continue aprendendo. Pequenos passos constantes podem transformar
-            a maneira como você conhece e vive a Palavra.
-          </p>
-
-          <div className="lesson-xp-reward">
-            <Star size={20} />
-            <strong>+80 XP</strong>
-            <span>adicionados ao seu progresso</span>
-          </div>
-
-          <div className="completion-actions">
-            <button
-              className="reader-secondary-button"
-              onClick={() => {
-                setCompleted(false);
-                setSection(0);
-              }}
-            >
-              Rever lição
-            </button>
-
-            <button className="reader-primary-button">
-              Próxima lição
-              <ArrowRight size={17} />
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="lesson-reader-page">
-      <header className="reader-header">
-        <button className="reader-back-button">
-          <ArrowLeft size={17} />
-          Voltar às lições
+    <main className="feature-page lesson-reader-page">
+      <div className="feature-topbar">
+        <Link to="/app/lessons" className="feature-back">
+          <ArrowLeft size={18} />
+          {t.back}
+        </Link>
+
+        <button
+          className="language-switch"
+          onClick={() => setLanguage(language === "en" ? "pt" : "en")}
+        >
+          {language === "en" ? "PT" : "EN"}
         </button>
-
-        <div className="reader-progress-label">
-          <span>LIÇÃO 04</span>
-          <strong>{section + 1} de {sections.length}</strong>
-        </div>
-      </header>
-
-      <div className="reader-progress">
-        <span style={{ width: `${progress}%` }} />
       </div>
 
-      <main className="reader-layout">
-        <article className="reader-content">
-          <div className="reader-title-block">
-            <span className="eyebrow">FÉ</span>
-            <h1>Vivendo pela fé</h1>
-            <p>
-              Aprenda o que significa confiar em Deus e como desenvolver uma
-              fé prática no dia a dia.
-            </p>
+      <section className="lesson-reader-hero">
+        <div className="lesson-reader-icon">
+          <BookOpen size={34} />
+        </div>
 
-            <div className="reader-meta">
-              <span>
-                <BookOpen size={14} />
-                14 min
-              </span>
-              <span>80 XP</span>
-              <span>Intermediário</span>
-            </div>
-          </div>
+        <span className="feature-eyebrow">{t.lesson}</span>
+        <h1>{t.title}</h1>
+        <p>{t.subtitle}</p>
 
-          <div className="reader-section">
-            <div className="reader-section-number">
-              {String(section + 1).padStart(2, "0")}
-            </div>
+        <div className="lesson-reader-stats">
+          <span>
+            <Star size={16} /> +25 {t.xp}
+          </span>
+          <span>
+            <Flame size={16} /> {state.streak} {t.streak}
+          </span>
+          <span>
+            <Heart size={16} /> {state.hearts} {t.hearts}
+          </span>
+        </div>
+      </section>
 
-            <h2>{current.title}</h2>
+      <section className="lesson-reader-card">
+        <span className="feature-eyebrow">{t.reading}</span>
+        <h2>{t.title}</h2>
+        <p>{t.paragraph1}</p>
+        <p>{t.paragraph2}</p>
 
-            <p className="reader-main-text">{current.text}</p>
+        <div className="lesson-reader-quote">
+          <BookOpen size={20} />
+          <strong>
+            “For God so loved the world that he gave his one and only Son.”
+          </strong>
+          <span>John 3:16</span>
+        </div>
+      </section>
 
-            <blockquote className="reader-verse">
-              <BookOpen size={19} />
-              <div>
-                <p>“{current.verse}”</p>
-                <cite>{current.reference}</cite>
-              </div>
-            </blockquote>
+      <section className="lesson-reader-card">
+        <span className="feature-eyebrow">{t.reflection}</span>
+        <h2>{t.question}</h2>
 
-            <div className="reader-insight">
-              <div className="insight-icon">
-                <Lightbulb size={19} />
-              </div>
+        <div className="lesson-reader-answer">
+          <CheckCircle2 size={20} />
+          {t.answer}
+        </div>
+      </section>
 
-              <div>
-                <strong>Para refletir</strong>
-                <p>
-                  Onde você precisa confiar mais em Deus hoje, mesmo sem saber
-                  exatamente como as coisas vão acontecer?
-                </p>
-              </div>
-            </div>
-
-            <div className="reader-note">
-              <MessageCircle size={18} />
-              <span>
-                Pense por alguns segundos antes de avançar para a próxima
-                parte.
-              </span>
-            </div>
-          </div>
-
-          <div className="reader-navigation">
-            <button
-              className="reader-secondary-button"
-              onClick={previous}
-              disabled={section === 0}
-            >
-              <ArrowLeft size={16} />
-              Anterior
-            </button>
-
-            <button
-              className={`reader-save-button ${saved ? "saved" : ""}`}
-              onClick={() => setSaved((value) => !value)}
-            >
-              <CheckCircle size={16} />
-              {saved ? "Salvo" : "Marcar como concluída"}
-            </button>
-
-            <button className="reader-primary-button" onClick={next}>
-              {last ? "Concluir lição" : "Continuar"}
-              {last ? <Trophy size={16} /> : <ArrowRight size={16} />}
-            </button>
-          </div>
-        </article>
-
-        <aside className="reader-sidebar">
-          <div className="reader-sidebar-card">
-            <div className="reader-sidebar-icon">
-              <Play size={17} fill="currentColor" />
-            </div>
-
-            <span className="eyebrow">ÁUDIO</span>
-
-            <h3>Ouça esta lição</h3>
-
-            <p>
-              Aprenda enquanto caminha, viaja ou simplesmente relaxa.
-            </p>
-
-            <button className="reader-audio-button">
-              <Play size={14} fill="currentColor" />
-              Ouvir agora
-            </button>
-          </div>
-
-          <div className="reader-sidebar-card">
-            <span className="eyebrow">SEU PROGRESSO</span>
-
-            <div className="reader-sidebar-progress">
-              <strong>{Math.round(progress)}%</strong>
-              <span>concluído</span>
-            </div>
-
-            <div className="mini-progress">
-              <span style={{ width: `${progress}%` }} />
-            </div>
-
-            <div className="reader-sidebar-list">
-              {sections.map((item, index) => (
-                <div
-                  className={`reader-sidebar-item ${
-                    index === section ? "active" : ""
-                  } ${index < section ? "done" : ""}`}
-                  key={item.title}
-                >
-                  <span>
-                    {index < section ? (
-                      <CheckCircle size={15} />
-                    ) : (
-                      index + 1
-                    )}
-                  </span>
-                  <p>{item.title}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-      </main>
-    </div>
+      {completed ? (
+        <section className="lesson-complete-card">
+          <Trophy size={38} />
+          <h2>{t.completed}</h2>
+          <p>{t.earned}</p>
+          <button onClick={() => navigate("/app/lessons")}>
+            {t.continue}
+            <ChevronRight size={18} />
+          </button>
+        </section>
+      ) : (
+        <button className="lesson-complete-button" onClick={handleComplete}>
+          <CheckCircle2 size={20} />
+          {t.complete}
+        </button>
+      )}
+    </main>
   );
 }

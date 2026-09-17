@@ -1,333 +1,213 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
+  BookOpen,
   Flame,
   Trophy,
-  BookOpen,
+  Star,
   ArrowRight,
+  CheckCircle,
   Play,
-  Clock3,
-  Target,
-  Sparkles,
+  Globe,
+  Lock,
 } from "lucide-react";
-import { getDashboardData, recordActivity } from "../lib/digleApi";
+
+const content = {
+  en: {
+    greeting: "Welcome back",
+    subtitle: "Continue your journey through God's Word.",
+    continue: "Continue learning",
+    daily: "Daily lesson",
+    progress: "Your progress",
+    streak: "Day streak",
+    xp: "Total XP",
+    completed: "Completed",
+    courses: "Learning paths",
+    viewAll: "View all",
+    recommended: "Recommended for you",
+    start: "Start lesson",
+    challenge: "Daily challenge",
+    challengeText: "Test your Bible knowledge and earn extra XP.",
+    takeChallenge: "Take challenge",
+  },
+  pt: {
+    greeting: "Bem-vindo de volta",
+    subtitle: "Continue a sua jornada através da Palavra de Deus.",
+    continue: "Continuar a aprender",
+    daily: "Lição diária",
+    progress: "O seu progresso",
+    streak: "Dias consecutivos",
+    xp: "XP total",
+    completed: "Concluído",
+    courses: "Caminhos de aprendizagem",
+    viewAll: "Ver todos",
+    recommended: "Recomendado para si",
+    start: "Começar lição",
+    challenge: "Desafio diário",
+    challengeText: "Teste os seus conhecimentos bíblicos e ganhe XP extra.",
+    takeChallenge: "Aceitar desafio",
+  },
+};
+
+const paths = [
+  {
+    title: "The Life of Jesus",
+    pt: "A Vida de Jesus",
+    description: "Discover the life and teachings of Jesus Christ.",
+    descriptionPt: "Descubra a vida e os ensinamentos de Jesus Cristo.",
+    progress: 35,
+    icon: "✝️",
+  },
+  {
+    title: "Foundations of Faith",
+    pt: "Fundamentos da Fé",
+    description: "Build a strong foundation in Christian faith.",
+    descriptionPt: "Construa uma base sólida na fé cristã.",
+    progress: 60,
+    icon: "📖",
+  },
+  {
+    title: "Wisdom & Proverbs",
+    pt: "Sabedoria e Provérbios",
+    description: "Learn practical wisdom for everyday life.",
+    descriptionPt: "Aprenda sabedoria prática para a vida diária.",
+    progress: 10,
+    icon: "🌿",
+  },
+];
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-
-  const [data, setData] = useState({
-    user: null,
-    stats: null,
-    progress: [],
-    achievements: [],
-  });
-
-  const [loading, setLoading] = useState(true);
-
-  const load = async () => {
-    try {
-      setLoading(true);
-      setData(await getDashboardData());
-    } catch (error) {
-      console.error("Dashboard:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  const xp = Number(data.stats?.xp_total || 0);
-  const streak = Number(data.stats?.streak_current || 0);
-  const level = Math.floor(xp / 100) + 1;
-  const currentLevelXP = (level - 1) * 100;
-  const nextLevelXP = level * 100;
-  const levelProgress = Math.min(
-    100,
-    ((xp - currentLevelXP) / 100) * 100
-  );
-
-  const completedLessons = data.progress.filter(
-    (item) => item.status === "completed"
-  ).length;
-
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-
-    if (hour < 12) return "Bom dia";
-    if (hour < 18) return "Boa tarde";
-    return "Boa noite";
-  }, []);
-
-  const name =
-    data.user?.user_metadata?.display_name ||
-    data.user?.email?.split("@")[0] ||
-    "Peregrino";
-
-  const continueLessons = [
-    {
-      id: "vivendo-pela-fe",
-      title: "Vivendo pela fé",
-      category: "Fé",
-      progress: 66,
-      duration: "12 min",
-    },
-    {
-      id: "poder-da-oracao",
-      title: "O poder da oração",
-      category: "Oração",
-      progress: 40,
-      duration: "15 min",
-    },
-    {
-      id: "amor-de-cristo",
-      title: "O amor de Cristo",
-      category: "Evangelho",
-      progress: 18,
-      duration: "18 min",
-    },
-  ];
-
-  const todayTasks = [
-    {
-      title: "Completar uma lição",
-      done: completedLessons > 0,
-    },
-    {
-      title: "Responder ao desafio diário",
-      done: false,
-    },
-    {
-      title: "Ler a Bíblia",
-      done: false,
-    },
-  ];
-
-  const completedTasks = todayTasks.filter((task) => task.done).length;
+  const [language, setLanguage] = useState("en");
+  const t = content[language];
 
   return (
     <main className="digle-dashboard">
-      <section className="dashboard-welcome">
+      <header className="digle-topbar">
         <div>
-          <span className="dashboard-eyebrow">
-            <Sparkles size={14} />
-            SUA JORNADA BÍBLICA
-          </span>
-
-          <h1>
-            {greeting}! {name} 👋
-          </h1>
-
-          <p>
-            Continue sua jornada e descubra algo novo hoje.
-          </p>
+          <div className="digle-logo">digle<span>.</span></div>
+          <p className="digle-muted">Bible learning, made joyful.</p>
         </div>
 
         <button
-          className="dashboard-primary-action"
-          onClick={() => navigate("/app/lessons")}
+          className="digle-language"
+          onClick={() => setLanguage(language === "en" ? "pt" : "en")}
         >
-          <Play size={16} />
-          Continuar estudando
+          <Globe size={17} />
+          {language === "en" ? "PT" : "EN"}
         </button>
-      </section>
+      </header>
 
-      <section className="dashboard-stat-grid">
-        <article className="dashboard-stat-card featured">
-          <div className="dashboard-stat-top">
-            <div className="dashboard-stat-icon">
-              <Flame size={19} />
-            </div>
-            <span>SEQUÊNCIA</span>
-          </div>
-
-          <strong>{loading ? "—" : `${streak} dias`}</strong>
-          <small>Continue hoje para manter sua sequência.</small>
-        </article>
-
-        <article className="dashboard-stat-card">
-          <div className="dashboard-stat-top">
-            <div className="dashboard-stat-icon">
-              <Trophy size={19} />
-            </div>
-            <span>XP TOTAL</span>
-          </div>
-
-          <strong>{loading ? "—" : xp.toLocaleString("pt-BR")}</strong>
-          <small>
-            {Math.max(0, nextLevelXP - xp)} XP para o nível {level + 1}
-          </small>
-        </article>
-
-        <article className="dashboard-stat-card">
-          <div className="dashboard-stat-top">
-            <div className="dashboard-stat-icon">
-              <BookOpen size={19} />
-            </div>
-            <span>LIÇÕES</span>
-          </div>
-
-          <strong>{loading ? "—" : completedLessons}</strong>
-          <small>lições concluídas na sua jornada.</small>
-        </article>
-
-        <article className="dashboard-stat-card">
-          <div className="dashboard-stat-top">
-            <div className="dashboard-stat-icon">
-              <Target size={19} />
-            </div>
-            <span>OBJETIVO</span>
-          </div>
-
-          <strong>{completedTasks}/3</strong>
-          <small>tarefas concluídas hoje</small>
-        </article>
-      </section>
-
-      <section className="dashboard-main-grid">
-        <div className="dashboard-left-column">
-          <div className="dashboard-section-heading">
-            <div>
-              <span>CONTINUE DE ONDE PAROU</span>
-              <h2>Suas lições</h2>
-            </div>
-
-            <button onClick={() => navigate("/app/lessons")}>
-              Ver todas
-              <ArrowRight size={15} />
-            </button>
-          </div>
-
-          <div className="dashboard-lessons">
-            {continueLessons.map((lesson, index) => (
-              <article className="dashboard-lesson" key={lesson.id}>
-                <div className="dashboard-lesson-number">
-                  0{index + 1}
-                </div>
-
-                <div className="dashboard-lesson-content">
-                  <span>{lesson.category}</span>
-                  <h3>{lesson.title}</h3>
-
-                  <div className="dashboard-progress-track">
-                    <div style={{ width: `${lesson.progress}%` }} />
-                  </div>
-
-                  <div className="dashboard-lesson-meta">
-                    <small>{lesson.progress}% concluído</small>
-
-                    <small>
-                      <Clock3 size={13} />
-                      {lesson.duration}
-                    </small>
-                  </div>
-                </div>
-
-                <button
-                  className="dashboard-lesson-action"
-                  onClick={() => navigate("/app/lessons")}
-                >
-                  <Play size={15} />
-                </button>
-              </article>
-            ))}
-          </div>
-
-          <div className="dashboard-section-heading weekly-heading">
-            <div>
-              <span>SEU NÍVEL</span>
-              <h2>Nível {level}</h2>
-            </div>
-
-            <strong>{xp} XP</strong>
-          </div>
-
-          <article className="dashboard-chart-card">
-            <div className="dashboard-level-progress">
-              <div
-                className="dashboard-level-progress-fill"
-                style={{ width: `${levelProgress}%` }}
-              />
-            </div>
-
-            <div className="dashboard-level-meta">
-              <span>{currentLevelXP} XP</span>
-              <span>{nextLevelXP} XP</span>
-            </div>
-          </article>
+      <section className="digle-hero">
+        <div>
+          <p className="digle-eyebrow">{t.greeting} 👋</p>
+          <h1>{t.subtitle}</h1>
+          <Link to="/app/lessons" className="digle-primary">
+            {t.continue}
+            <ArrowRight size={18} />
+          </Link>
         </div>
 
-        <aside className="dashboard-right-column">
-          <div className="dashboard-section-heading">
-            <div>
-              <span>HOJE</span>
-              <h2>Seu objetivo</h2>
+        <div className="digle-hero-symbol">✝</div>
+      </section>
+
+      <section className="digle-stats">
+        <div className="digle-stat">
+          <Flame size={22} />
+          <strong>7</strong>
+          <span>{t.streak}</span>
+        </div>
+
+        <div className="digle-stat">
+          <Star size={22} />
+          <strong>1,240</strong>
+          <span>{t.xp}</span>
+        </div>
+
+        <div className="digle-stat">
+          <Trophy size={22} />
+          <strong>12</strong>
+          <span>{t.completed}</span>
+        </div>
+      </section>
+
+      <section className="digle-section">
+        <div className="digle-section-heading">
+          <h2>{t.daily}</h2>
+          <span>+25 XP</span>
+        </div>
+
+        <div className="digle-daily-card">
+          <div className="digle-icon-box">📚</div>
+          <div className="digle-card-content">
+            <h3>{language === "en" ? "Walking with God" : "Caminhando com Deus"}</h3>
+            <p>
+              {language === "en"
+                ? "Learn how to strengthen your relationship with God."
+                : "Aprenda a fortalecer a sua relação com Deus."}
+            </p>
+            <div className="digle-progress">
+              <div style={{ width: "40%" }} />
             </div>
           </div>
+          <Link to="/app/lessons" className="digle-round-button">
+            <Play size={18} />
+          </Link>
+        </div>
+      </section>
 
-          <article className="dashboard-daily-card">
-            <div className="dashboard-daily-top">
-              <div>
-                <span>PROGRESSO DIÁRIO</span>
-                <strong>{completedTasks}/3</strong>
+      <section className="digle-section">
+        <div className="digle-section-heading">
+          <h2>{t.courses}</h2>
+          <Link to="/app/trails">{t.viewAll}</Link>
+        </div>
+
+        <div className="digle-path-grid">
+          {paths.map((path) => (
+            <Link to="/app/trails" className="digle-path-card" key={path.title}>
+              <div className="digle-path-icon">{path.icon}</div>
+              <h3>{language === "en" ? path.title : path.pt}</h3>
+              <p>{language === "en" ? path.description : path.descriptionPt}</p>
+
+              <div className="digle-progress">
+                <div style={{ width: `${path.progress}%` }} />
               </div>
 
-              <Target size={22} />
-            </div>
-
-            <div className="dashboard-daily-progress">
-              <div
-                style={{
-                  width: `${(completedTasks / 3) * 100}%`,
-                }}
-              />
-            </div>
-
-            <div className="dashboard-daily-tasks">
-              {todayTasks.map((task) => (
-                <div key={task.title}>
-                  <span className={task.done ? "done" : ""}>
-                    {task.done ? "✓" : "○"}
-                  </span>
-                  <p>{task.title}</p>
-                </div>
-              ))}
-            </div>
-
-            <button
-              className="primary-btn"
-              onClick={async () => {
-                try {
-                  await recordActivity({
-                    type: "dashboard",
-                    minutes: 1,
-                    xp: 0,
-                  });
-                  await load();
-                } catch (error) {
-                  console.error(error);
-                }
-              }}
-            >
-              Atualizar progresso
-            </button>
-          </article>
-
-          <article className="dashboard-next-level">
-            <Trophy size={22} />
-
-            <div>
-              <span>PRÓXIMO NÍVEL</span>
-              <strong>Nível {level + 1}</strong>
-              <small>
-                Faltam {Math.max(0, nextLevelXP - xp)} XP
-              </small>
-            </div>
-          </article>
-        </aside>
+              <small>{path.progress}%</small>
+            </Link>
+          ))}
+        </div>
       </section>
+
+      <section className="digle-challenge">
+        <div className="digle-challenge-icon">🏆</div>
+        <div>
+          <h2>{t.challenge}</h2>
+          <p>{t.challengeText}</p>
+          <Link to="/app/quiz-hub" className="digle-secondary">
+            {t.takeChallenge}
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
+      <nav className="digle-bottom-nav">
+        <Link to="/app" className="active">
+          <BookOpen size={19} />
+          Home
+        </Link>
+        <Link to="/app/lessons">
+          <Play size={19} />
+          Learn
+        </Link>
+        <Link to="/app/ranking">
+          <Trophy size={19} />
+          Ranking
+        </Link>
+        <Link to="/app/achievements">
+          <CheckCircle size={19} />
+          Goals
+        </Link>
+      </nav>
     </main>
   );
 }

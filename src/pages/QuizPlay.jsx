@@ -1,130 +1,194 @@
-import React, { useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  CheckCircle2,
-  Trophy,
-  X,
-  Zap,
-} from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, CheckCircle2, Flame, Heart, Trophy, XCircle } from "lucide-react";
+import { useGamification } from "../hooks/useGamification";
 
-const questions = [
-  {
-    text: "Qual é o primeiro livro da Bíblia?",
-    answers: ["Êxodo", "Gênesis", "Mateus", "Salmos"],
-    correct: 1,
+const questions = {
+  en: [
+    {
+      question: "Who built the ark?",
+      options: ["Moses", "Noah", "David", "Peter"],
+      correct: "Noah",
+    },
+    {
+      question: "How many days did God take to create the world?",
+      options: ["5", "6", "7", "12"],
+      correct: "6",
+    },
+    {
+      question: "Who was the mother of Jesus?",
+      options: ["Mary", "Martha", "Ruth", "Sarah"],
+      correct: "Mary",
+    },
+  ],
+  pt: [
+    {
+      question: "Quem construiu a arca?",
+      options: ["Moisés", "Noé", "David", "Pedro"],
+      correct: "Noé",
+    },
+    {
+      question: "Quantos dias Deus levou para criar o mundo?",
+      options: ["5", "6", "7", "12"],
+      correct: "6",
+    },
+    {
+      question: "Quem era a mãe de Jesus?",
+      options: ["Maria", "Marta", "Rute", "Sara"],
+      correct: "Maria",
+    },
+  ],
+};
+
+const text = {
+  en: {
+    back: "Back to quizzes",
+    title: "Bible Knowledge",
+    question: "Question",
+    next: "Next question",
+    finish: "Finish quiz",
+    correct: "Correct answer!",
+    incorrect: "Not quite. Keep learning!",
+    result: "Quiz complete!",
+    score: "Your score",
+    xp: "XP earned",
+    continue: "Continue",
   },
-  {
-    text: "Quem construiu a arca?",
-    answers: ["Moisés", "Abraão", "Noé", "Davi"],
-    correct: 2,
+  pt: {
+    back: "Voltar aos quizzes",
+    title: "Conhecimento Bíblico",
+    question: "Pergunta",
+    next: "Próxima pergunta",
+    finish: "Terminar quiz",
+    correct: "Resposta correta!",
+    incorrect: "Não foi desta vez. Continua a aprender!",
+    result: "Quiz concluído!",
+    score: "A tua pontuação",
+    xp: "XP ganho",
+    continue: "Continuar",
   },
-  {
-    text: "Quantos discípulos Jesus escolheu?",
-    answers: ["7", "10", "12", "40"],
-    correct: 2,
-  },
-];
+};
 
 export default function QuizPlay() {
-  const [index, setIndex] = useState(0);
-  const [selected, setSelected] = useState(null);
+  const navigate = useNavigate();
+  const [language, setLanguage] = useState("en");
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState("");
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [earned, setEarned] = useState(false);
+  const { state, finishQuiz } = useGamification();
 
-  const question = questions[index];
+  const list = questions[language];
+  const t = text[language];
+  const item = list[current];
+  const answered = Boolean(selected);
+  const isCorrect = selected === item.correct;
 
-  const answer = (i) => {
-    if (selected !== null) return;
-    setSelected(i);
-    if (i === question.correct) setScore(score + 1);
+  const chooseAnswer = (answer) => {
+    if (answered) return;
+    setSelected(answer);
+    if (answer === item.correct) setScore((value) => value + 1);
   };
 
-  const next = () => {
-    if (index === questions.length - 1) {
+  const nextQuestion = () => {
+    if (current === list.length - 1) {
+      if (!earned) {
+        finishQuiz("bible-knowledge");
+        setEarned(true);
+      }
       setFinished(true);
       return;
     }
-    setIndex(index + 1);
-    setSelected(null);
+
+    setCurrent((value) => value + 1);
+    setSelected("");
   };
 
-  if (finished) {
-    return (
-      <main className="digle-page quiz-result-page">
-        <div className="quiz-result-icon"><Trophy size={48} /></div>
-        <span className="eyebrow">QUIZ CONCLUÍDO</span>
-        <h1>Você terminou!</h1>
-        <p>Veja como você se saiu neste desafio.</p>
-
-        <div className="quiz-result-score">
-          <strong>{score}/{questions.length}</strong>
-          <span>respostas corretas</span>
-        </div>
-
-        <div className="result-stats">
-          <div><CheckCircle2 /><strong>{score}</strong><span>corretas</span></div>
-          <div><X /><strong>{questions.length - score}</strong><span>erradas</span></div>
-          <div><Zap /><strong>+{score * 50}</strong><span>XP</span></div>
-        </div>
-
-        <button className="primary-button" onClick={() => window.location.reload()}>
-          Fazer novamente <ArrowRight size={17} />
-        </button>
-      </main>
-    );
-  }
-
   return (
-    <main className="digle-page quiz-play-page">
-      <button className="quiz-back"><ArrowLeft size={17} /> Sair do quiz</button>
+    <main className="feature-page quiz-play-page">
+      <div className="feature-topbar">
+        <Link to="/app/quiz-hub" className="feature-back">
+          <ArrowLeft size={18} />
+          {t.back}
+        </Link>
 
-      <div className="quiz-play-top">
-        <span>PERGUNTA {index + 1} DE {questions.length}</span>
-        <strong><Zap size={15} /> +50 XP</strong>
+        <button
+          className="language-switch"
+          onClick={() => setLanguage(language === "en" ? "pt" : "en")}
+        >
+          {language === "en" ? "PT" : "EN"}
+        </button>
       </div>
 
-      <div className="quiz-question-progress"><i style={{ width: `${((index + 1) / questions.length) * 100}%` }} /></div>
+      {!finished ? (
+        <>
+          <section className="quiz-play-header">
+            <div>
+              <span className="feature-eyebrow">{t.title}</span>
+              <h1>{t.question} {current + 1}</h1>
+            </div>
 
-      <section className="quiz-question">
-        <h1>{question.text}</h1>
+            <div className="quiz-play-mini-stats">
+              <span><Flame size={15} /> {state.streak}</span>
+              <span><Heart size={15} /> {state.hearts}</span>
+            </div>
+          </section>
 
-        <div className="answers">
-          {question.answers.map((answerText, i) => {
-            const correct = selected !== null && i === question.correct;
-            const wrong = selected === i && i !== question.correct;
-
-            return (
-              <button
-                key={answerText}
-                className={`${correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
-                onClick={() => answer(i)}
-              >
-                <span>{String.fromCharCode(65 + i)}</span>
-                {answerText}
-                {correct && <Check />}
-                {wrong && <X />}
-              </button>
-            );
-          })}
-        </div>
-
-        {selected !== null && (
-          <div className={`answer-feedback ${selected === question.correct ? "success" : "error"}`}>
-            {selected === question.correct ? (
-              <><CheckCircle2 /><div><strong>Resposta correta!</strong><span>Você ganhou 50 XP.</span></div></>
-            ) : (
-              <><X /><div><strong>Quase!</strong><span>A resposta correta está destacada acima.</span></div></>
-            )}
+          <div className="quiz-play-progress">
+            <div style={{ width: `${((current + 1) / list.length) * 100}%` }} />
           </div>
-        )}
 
-        <button className="primary-button quiz-next" disabled={selected === null} onClick={next}>
-          {index === questions.length - 1 ? "Ver resultado" : "Próxima pergunta"}
-          <ArrowRight size={17} />
-        </button>
-      </section>
+          <section className="quiz-question-card">
+            <h2>{item.question}</h2>
+
+            <div className="quiz-options">
+              {item.options.map((option) => {
+                const correct = answered && option === item.correct;
+                const wrong = answered && option === selected && !isCorrect;
+
+                return (
+                  <button
+                    key={option}
+                    className={`quiz-option ${correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
+                    onClick={() => chooseAnswer(option)}
+                  >
+                    <span>{option}</span>
+                    {correct && <CheckCircle2 size={20} />}
+                    {wrong && <XCircle size={20} />}
+                  </button>
+                );
+              })}
+            </div>
+
+            {answered && (
+              <div className={`quiz-feedback ${isCorrect ? "success" : "error"}`}>
+                {isCorrect ? t.correct : t.incorrect}
+              </div>
+            )}
+
+            <button
+              className="quiz-next-button"
+              disabled={!answered}
+              onClick={nextQuestion}
+            >
+              {current === list.length - 1 ? t.finish : t.next}
+            </button>
+          </section>
+        </>
+      ) : (
+        <section className="quiz-result-card">
+          <Trophy size={58} />
+          <span className="feature-eyebrow">{t.title}</span>
+          <h1>{t.result}</h1>
+          <p>{t.score}: <strong>{score}/{list.length}</strong></p>
+          <p>{t.xp}: <strong>+30</strong></p>
+
+          <button onClick={() => navigate("/app/quiz-hub")}>
+            {t.continue}
+          </button>
+        </section>
+      )}
     </main>
   );
 }
