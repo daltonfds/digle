@@ -71,7 +71,6 @@ const weeklyGoals = [
 
 export default function Goals() {
   const navigate = useNavigate();
-  const navigate = useNavigate();
   const [goals, setGoals] = useState(
     getStored("goals", defaultGoals)
   );

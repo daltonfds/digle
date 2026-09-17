@@ -19,7 +19,6 @@ const subjects = [
 
 export default function ContactSupport() {
   const navigate = useNavigate();
-  const navigate = useNavigate();
   const [subject, setSubject] = useState(subjects[0]);
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");

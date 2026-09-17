@@ -103,7 +103,6 @@ const articles = [
 
 export default function HelpCenter() {
   const navigate = useNavigate();
-  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [open, setOpen] = useState(null);

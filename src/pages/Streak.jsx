@@ -45,7 +45,6 @@ function makeMonthDays(year, month) {
 
 export default function Streak() {
   const navigate = useNavigate();
-  const navigate = useNavigate();
   const today = new Date();
 
   const [month, setMonth] = useState(today.getMonth());
